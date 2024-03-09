@@ -111,6 +111,4 @@ public class CourseBase implements Serializable {
      * 课程发布状态 未发布  已发布 下线
      */
     private String status;
-
-
 }
