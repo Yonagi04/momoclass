@@ -2,6 +2,7 @@ package com.momoclass.content.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.momoclass.base.exception.MomoClassException;
 import com.momoclass.base.model.PageParams;
 import com.momoclass.base.model.PageResult;
 import com.momoclass.content.mapper.CourseBaseMapper;
@@ -72,22 +73,28 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     public CourseBaseInfoDto createCourseBase(Long companyId, AddCourseDto addCourseDto) {
         // 参数合法性校验
         if (StringUtils.isBlank(addCourseDto.getName())) {
-            throw new RuntimeException("课程名称为空");
+//            throw new RuntimeException("课程名称为空");
+            MomoClassException.cast("课程名称为空");
         }
         if (StringUtils.isBlank(addCourseDto.getMt())) {
-            throw new RuntimeException("课程分类为空");
+//            throw new RuntimeException("课程分类为空");
+            MomoClassException.cast("课程分类为空");
         }
         if (StringUtils.isBlank(addCourseDto.getGrade())) {
-            throw new RuntimeException("课程等级为空");
+//            throw new RuntimeException("课程等级为空");
+            MomoClassException.cast("课程等级为空");
         }
         if (StringUtils.isBlank(addCourseDto.getTeachmode())) {
-            throw new RuntimeException("教育模式为空");
+//            throw new RuntimeException("教育模式为空");
+            MomoClassException.cast("教育模式为空");
         }
         if (StringUtils.isBlank(addCourseDto.getUsers())) {
-            throw new RuntimeException("适应人群为空");
+//            throw new RuntimeException("适应人群为空");
+            MomoClassException.cast("适应人群为空");
         }
         if (StringUtils.isBlank(addCourseDto.getCharge())) {
-            throw new RuntimeException("收费规则为空");
+//            throw new RuntimeException("收费规则为空");
+            MomoClassException.cast("收费规则为空");
         }
 
         CourseBase courseBase = new CourseBase();
@@ -98,7 +105,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         courseBase.setCreateDate(LocalDateTime.now());
         int insert = courseBaseMapper.insert(courseBase);
         if (insert <= 0) {
-            throw new RuntimeException("新增课程信息失败");
+//            throw new RuntimeException("新增课程信息失败");
+            MomoClassException.cast("新增课程信息失败");
         }
 
         CourseMarket courseMarket = new CourseMarket();
@@ -107,7 +115,8 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         courseMarket.setId(courseId);
         int result = saveCourseMarket(courseMarket);
         if (result <= 0) {
-            throw new RuntimeException("保存课程营销信息失败");
+//            throw new RuntimeException("保存课程营销信息失败");
+            MomoClassException.cast("保存课程营销信息失败");
         }
         return getCourseBaseInfo(courseId);
     }
@@ -116,13 +125,16 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
     private int saveCourseMarket(CourseMarket courseMarket) {
         String charge = courseMarket.getCharge();
         if (StringUtils.isBlank(charge)) {
-            throw new RuntimeException("收费规则为空");
+//            throw new RuntimeException("收费规则为空");
+            MomoClassException.cast("收费规则为空");
         }
         if (charge.equals("201001")) {
             if (courseMarket.getPrice() == null) {
-                throw new RuntimeException("课程的价格不能为空");
+//                throw new RuntimeException("课程的价格不能为空");
+                MomoClassException.cast("课程的价格不能为空");
             } else if (courseMarket.getPrice().floatValue() <= 0) {
-                throw new RuntimeException("课程的价格不能小于0");
+//                throw new RuntimeException("课程的价格不能小于0");
+                MomoClassException.cast("课程的价格不能小于0");
             }
         }
 

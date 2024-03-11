@@ -30,3 +30,5 @@ logs/
 
 ###VS Code###
 .vscode/
+/momoclass-system/momoclass-system-api/src/test/java/com/momoclass/MomoclassSystemApiApplicationTests.java
+/momoclass-system/momoclass-system-service/src/test/java/com/momoclass/MomoclassSystemServiceApplicationTests.java

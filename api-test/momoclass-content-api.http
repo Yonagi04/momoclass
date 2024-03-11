@@ -33,3 +33,26 @@ Content-Type: application/json
   "grade": "204001",
   "description": "test"
 }
+
+### 系统异常测试
+POST {{content_host}}/content/course
+Content-Type: application/json
+
+{
+  "charge": "201001",
+  "price": 10,
+  "originalPrice": 100,
+  "qq": "23333",
+  "wechat": "23333test",
+  "phone": "13333222233",
+  "validDays": 365,
+  "mt": "1-1",
+  "st": "1-1-1",
+  "name": "",
+  "pic": "cbddl",
+  "teachmode": "200002",
+  "users": "初级人员",
+  "tags": "cbddl",
+  "grade": "204001",
+  "description": "test"
+}
