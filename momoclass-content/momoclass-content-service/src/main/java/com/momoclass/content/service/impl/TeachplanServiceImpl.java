@@ -61,4 +61,20 @@ public class TeachplanServiceImpl implements TeachplanService {
             }
         }
     }
+
+    @Override
+    public void deleteTeachplan(Long id) {
+        Teachplan teachplan = teachplanMapper.selectById(id);
+
+        Long parentid = teachplan.getParentid();
+        Long courseId = teachplan.getCourseId();
+        LambdaQueryWrapper<Teachplan> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper = queryWrapper.eq(Teachplan::getCourseId, courseId).eq(Teachplan::getParentid, id);
+        Integer count = teachplanMapper.selectCount(queryWrapper);
+        if (count != 0) {
+            MomoClassException.cast("课程计划信息还有子级信息，无法操作");
+        } else {
+            teachplanMapper.deleteById(id);
+        }
+    }
 }

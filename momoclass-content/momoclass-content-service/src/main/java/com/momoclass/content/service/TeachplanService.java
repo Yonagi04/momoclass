@@ -18,4 +18,7 @@ public interface TeachplanService {
 
     // 保存/修改课程计划
     public void saveTeachplan(SaveTeachplanDto saveTeachplanDto);
+
+    // 删除课程计划
+    public void deleteTeachplan(Long id);
 }
