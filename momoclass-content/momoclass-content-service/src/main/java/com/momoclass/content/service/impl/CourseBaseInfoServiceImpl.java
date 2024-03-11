@@ -10,6 +10,7 @@ import com.momoclass.content.mapper.CourseCategoryMapper;
 import com.momoclass.content.mapper.CourseMarketMapper;
 import com.momoclass.content.model.dto.AddCourseDto;
 import com.momoclass.content.model.dto.CourseBaseInfoDto;
+import com.momoclass.content.model.dto.EditCourseDto;
 import com.momoclass.content.model.dto.QueryCourseParamsDto;
 import com.momoclass.content.model.po.CourseBase;
 import com.momoclass.content.model.po.CourseCategory;
@@ -121,6 +122,55 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
         return getCourseBaseInfo(courseId);
     }
 
+    // 根据id查询课程信息
+    @Override
+    public CourseBaseInfoDto getCourseBaseInfo(Long courseId) {
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if (courseBase == null) {
+            return null;
+        }
+        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
+        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
+        BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
+        if (courseMarket != null) {
+            BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
+        }
+        String mt = courseBase.getMt();
+        CourseCategory courseCategory = courseCategoryMapper.selectById(mt);
+        courseBaseInfoDto.setMtName(courseCategory.getName());
+        return courseBaseInfoDto;
+    }
+
+    @Override
+    public CourseBaseInfoDto updateCourseBase(Long companyId, EditCourseDto editCourseDto) {
+        Long courseId = editCourseDto.getId();
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if (courseBase == null) {
+            MomoClassException.cast("课程不存在");
+        }
+        // 数据合法性校验
+        if (!companyId.equals(courseBase.getCompanyId())) {
+            MomoClassException.cast("本机构只能修改本机构的课程");
+        }
+
+        BeanUtils.copyProperties(editCourseDto, courseBase);
+        courseBase.setChangeDate(LocalDateTime.now());
+        int updateBase = courseBaseMapper.updateById(courseBase);
+        if (updateBase <= 0) {
+            MomoClassException.cast("修改课程失败");
+        }
+
+        CourseMarket courseMarket = new CourseMarket();
+        BeanUtils.copyProperties(editCourseDto, courseMarket);
+        int updateMarket = courseMarketMapper.updateById(courseMarket);
+        if (updateMarket <= 0) {
+            MomoClassException.cast("修改课程营销信息失败");
+        }
+
+        CourseBaseInfoDto courseBaseInfoDto = getCourseBaseInfo(courseId);
+        return courseBaseInfoDto;
+    }
+
     // 保存营销信息, 存在则更新, 不存在则保存
     private int saveCourseMarket(CourseMarket courseMarket) {
         String charge = courseMarket.getCharge();
@@ -152,23 +202,5 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
             int update = courseMarketMapper.updateById(courseMarketGetFromData);
             return update;
         }
-    }
-
-    // 查询课程信息
-    public CourseBaseInfoDto getCourseBaseInfo(Long courseId) {
-        CourseBase courseBase = courseBaseMapper.selectById(courseId);
-        if (courseBase == null) {
-            return null;
-        }
-        CourseMarket courseMarket = courseMarketMapper.selectById(courseId);
-        CourseBaseInfoDto courseBaseInfoDto = new CourseBaseInfoDto();
-        BeanUtils.copyProperties(courseBase, courseBaseInfoDto);
-        if (courseMarket != null) {
-            BeanUtils.copyProperties(courseMarket, courseBaseInfoDto);
-        }
-        String mt = courseBase.getMt();
-        CourseCategory courseCategory = courseCategoryMapper.selectById(mt);
-        courseBaseInfoDto.setMtName(courseCategory.getName());
-        return courseBaseInfoDto;
     }
 }

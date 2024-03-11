@@ -4,6 +4,7 @@ import com.momoclass.base.model.PageParams;
 import com.momoclass.base.model.PageResult;
 import com.momoclass.content.model.dto.AddCourseDto;
 import com.momoclass.content.model.dto.CourseBaseInfoDto;
+import com.momoclass.content.model.dto.EditCourseDto;
 import com.momoclass.content.model.dto.QueryCourseParamsDto;
 import com.momoclass.content.model.po.CourseBase;
 
@@ -22,5 +23,25 @@ public interface CourseBaseInfoService {
      */
     public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto courseParamsDto);
 
+    /**
+     * 新增课程
+     * @param companyId
+     * @param addCourseDto
+     * @return
+     */
     public CourseBaseInfoDto createCourseBase(Long companyId, AddCourseDto addCourseDto);
+
+    /**
+     * 按id查询课程
+     * @param courseId
+     * @return
+     */
+    public CourseBaseInfoDto getCourseBaseInfo(Long courseId);
+
+    /**
+     * 修改课程
+     * @param editCourseDto
+     * @return
+     */
+    public CourseBaseInfoDto updateCourseBase(Long companyId, EditCourseDto editCourseDto);
 }
