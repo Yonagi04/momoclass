@@ -2,6 +2,8 @@ package com.momoclass.content.api;
 
 import com.momoclass.base.model.PageParams;
 import com.momoclass.base.model.PageResult;
+import com.momoclass.content.model.dto.AddCourseDto;
+import com.momoclass.content.model.dto.CourseBaseInfoDto;
 import com.momoclass.content.model.dto.QueryCourseParamsDto;
 import com.momoclass.content.model.po.CourseBase;
 import com.momoclass.content.service.CourseBaseInfoService;
@@ -34,5 +36,15 @@ public class CourseBaseInfoController {
     public PageResult<CourseBase> list(PageParams pageParams, @RequestBody(required = false) QueryCourseParamsDto queryCourseParamsDto) {
         PageResult<CourseBase> courseBasePageResult = courseBaseInfoService.queryCourseBaseList(pageParams, queryCourseParamsDto);
         return courseBasePageResult;
+    }
+
+    @ApiOperation("新增课程")
+    @PostMapping("/course")
+    public CourseBaseInfoDto createCourseBase(@RequestBody AddCourseDto addCourseDto) {
+        // TODO 修改为真正的ID，目前先写死
+        Long companyId = 1232141425L;
+
+        CourseBaseInfoDto courseBase = courseBaseInfoService.createCourseBase(companyId, addCourseDto);
+        return courseBase;
     }
 }

@@ -1,5 +1,6 @@
 package com.momoclass.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.momoclass.system.mapper.DictionaryMapper;
 import com.momoclass.system.model.po.Dictionary;
@@ -14,11 +15,15 @@ import java.util.List;
 public class DictionaryServiceImpl extends ServiceImpl<DictionaryMapper, Dictionary> implements DictionaryService{
     @Override
     public List<Dictionary> queryAll() {
-        return null;
+        List<Dictionary> list = this.list();
+        return list;
     }
 
     @Override
     public Dictionary getByCode(String code) {
-        return null;
+        LambdaQueryWrapper<Dictionary> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Dictionary::getCode, code);
+        Dictionary dictionary = this.getOne(queryWrapper);
+        return dictionary;
     }
 }
