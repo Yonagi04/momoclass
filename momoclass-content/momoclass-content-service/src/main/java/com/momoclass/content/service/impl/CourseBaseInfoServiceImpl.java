@@ -5,16 +5,12 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.momoclass.base.exception.MomoClassException;
 import com.momoclass.base.model.PageParams;
 import com.momoclass.base.model.PageResult;
-import com.momoclass.content.mapper.CourseBaseMapper;
-import com.momoclass.content.mapper.CourseCategoryMapper;
-import com.momoclass.content.mapper.CourseMarketMapper;
+import com.momoclass.content.mapper.*;
 import com.momoclass.content.model.dto.AddCourseDto;
 import com.momoclass.content.model.dto.CourseBaseInfoDto;
 import com.momoclass.content.model.dto.EditCourseDto;
 import com.momoclass.content.model.dto.QueryCourseParamsDto;
-import com.momoclass.content.model.po.CourseBase;
-import com.momoclass.content.model.po.CourseCategory;
-import com.momoclass.content.model.po.CourseMarket;
+import com.momoclass.content.model.po.*;
 import com.momoclass.content.service.CourseBaseInfoService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -43,6 +39,12 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
     @Autowired
     CourseCategoryMapper courseCategoryMapper;
+
+    @Autowired
+    CourseTeacherMapper courseTeacherMapper;
+
+    @Autowired
+    TeachplanMapper teachplanMapper;
 
     @Override
     public PageResult<CourseBase> queryCourseBaseList(PageParams pageParams, QueryCourseParamsDto courseParamsDto) {
@@ -169,6 +171,28 @@ public class CourseBaseInfoServiceImpl implements CourseBaseInfoService {
 
         CourseBaseInfoDto courseBaseInfoDto = getCourseBaseInfo(courseId);
         return courseBaseInfoDto;
+    }
+
+    @Override
+    public void deleteCourse(Long companyId, Long courseId) {
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        if (!companyId.equals(courseBase.getCompanyId())) {
+            MomoClassException.cast("只允许删除本机构的课程");
+        } else {
+            // 删除教师信息
+            LambdaQueryWrapper<CourseTeacher> teacherWrapper = new LambdaQueryWrapper<>();
+            teacherWrapper.eq(CourseTeacher::getCourseId, courseId);
+            courseTeacherMapper.delete(teacherWrapper);
+            // 删除课程计划
+            LambdaQueryWrapper<Teachplan> teachplanWrapper = new LambdaQueryWrapper<>();
+            teachplanWrapper.eq(Teachplan::getCourseId, courseId);
+            teachplanMapper.delete(teachplanWrapper);
+            // 删除营销信息
+            courseMarketMapper.deleteById(courseId);
+            // 删除基本信息
+            courseBaseMapper.deleteById(courseId);
+        }
+
     }
 
     // 保存营销信息, 存在则更新, 不存在则保存

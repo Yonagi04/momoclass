@@ -11,6 +11,7 @@ import com.momoclass.content.model.po.CourseBase;
 import com.momoclass.content.service.CourseBaseInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -64,5 +65,13 @@ public class CourseBaseInfoController {
 
         CourseBaseInfoDto courseBaseInfoDto = courseBaseInfoService.updateCourseBase(companyId, editCourseDto);
         return courseBaseInfoDto;
+    }
+
+    @ApiOperation("删除课程")
+    @DeleteMapping("/course/{courseId}")
+    public void deleteCourse(@PathVariable Long courseId) {
+        // TODO 修改为真正的id，目前先写死
+        Long companyId = 1232141425L;
+        courseBaseInfoService.deleteCourse(companyId, courseId);
     }
 }
