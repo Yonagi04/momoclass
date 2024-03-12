@@ -65,3 +65,12 @@ GET  {{content_host}}/content/teachplan/117/tree-nodes
 
 ### 删除课程计划
 DELETE {{content_host}}/content/teachplan/256
+
+### 网关测试
+POST {{gateway_host}}/content/course/list?pageNo=2&pageSize=1
+Content-Type: application/json
+
+{
+  "auditStatus": "202002",
+  "courseName": ""
+}
