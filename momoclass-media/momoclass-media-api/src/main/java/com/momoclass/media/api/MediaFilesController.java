@@ -32,11 +32,11 @@ public class MediaFilesController {
     @Autowired
     MediaFilesService mediaFileService;
 
-    @ApiOperation("媒体列表查询接口")
+    @ApiOperation("媒资列表查询接口")
     @PostMapping("/files")
     public PageResult<MediaFiles> list(PageParams pageParams, @RequestBody QueryMediaParamsDto queryMediaParamsDto){
         Long companyId = 1232141425L;
-        return mediaFileService.queryMediaFiels(companyId,pageParams,queryMediaParamsDto);
+        return mediaFileService.queryMediaFiles(companyId,pageParams,queryMediaParamsDto);
     }
 
     @ApiOperation("上传文件")
@@ -45,30 +45,22 @@ public class MediaFilesController {
     public UploadFileResultDto uploadFile(@RequestPart("filedata") MultipartFile upload,
                                           @RequestParam(value = "folder", required = false) String folder,
                                           @RequestParam(value = "objectName", required = false) String objectName) throws IOException {
-        // 新上传文件
-        UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
-        // 文件大小
-        uploadFileParamsDto.setFileSize(upload.getSize());
-        if (upload.getContentType().contains("image")) {
-            // 文件类型
-            uploadFileParamsDto.setFileType("001001");
-        } else {
-            uploadFileParamsDto.setFileType("001003");
-        }
-
-        // 文件名
-        uploadFileParamsDto.setFileName(upload.getOriginalFilename());
-        // 文件content-type
-        uploadFileParamsDto.setContentType(upload.getContentType());
-
         Long companyId = 1232141425L;
+        UploadFileParamsDto uploadFileParamsDto = new UploadFileParamsDto();
+        uploadFileParamsDto.setFileSize(upload.getSize());
+        uploadFileParamsDto.setFileType("001001");
+        uploadFileParamsDto.setFileName(upload.getOriginalFilename());
+        // 创建临时文件
+        File tempFile = File.createTempFile("minio", "temp");
+        // 上传的文件拷贝到临时文件
+        upload.transferTo(tempFile);
+        // 文件路径
+        String absolutePath = tempFile.getAbsolutePath();
+        // 上传文件
+        UploadFileResultDto uploadFileResultDto =
+                mediaFileService.uploadFile(companyId, uploadFileParamsDto,
+                        absolutePath);
 
-        try {
-            UploadFileResultDto uploadFileResultDto = mediaFileService.uploadFile(companyId, uploadFileParamsDto, upload.getBytes(), folder, objectName);
-            return uploadFileResultDto;
-        } catch (IOException e) {
-            MomoClassException.cast("上传文件过程出错");
-        }
-        return null;
+        return uploadFileResultDto;
     }
 }
