@@ -29,4 +29,8 @@ public interface MediaFilesService {
     public RestResponse<Boolean> checkFile(String fileMd5);
     // 检查文件分块是否存在
     public RestResponse<Boolean> checkChunk(String fileMd5, int chunkIndex);
+    // 上传分块
+    public RestResponse uploadChunk(String fileMd5, int chunk, String localChunkFilePath);
+    // 合并分块
+    public RestResponse mergeChunk(Long companyId, String fileMd5, int chunkTotal, UploadFileParamsDto uploadFileParamsDto);
 }
