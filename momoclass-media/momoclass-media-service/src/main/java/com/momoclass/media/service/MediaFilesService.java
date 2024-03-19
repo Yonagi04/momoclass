@@ -9,6 +9,7 @@ import com.momoclass.media.model.dto.UploadFileResultDto;
 import com.momoclass.media.model.po.MediaFiles;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 
 /**
@@ -33,4 +34,9 @@ public interface MediaFilesService {
     public RestResponse uploadChunk(String fileMd5, int chunk, String localChunkFilePath);
     // 合并分块
     public RestResponse mergeChunk(Long companyId, String fileMd5, int chunkTotal, UploadFileParamsDto uploadFileParamsDto);
+
+    public File downloadFileFromMinIO(String bucket, String objectName);
+    public boolean addMediaFilesToMinIO(String localFilePath,String
+            mimeType,String bucket, String objectName);
+
 }

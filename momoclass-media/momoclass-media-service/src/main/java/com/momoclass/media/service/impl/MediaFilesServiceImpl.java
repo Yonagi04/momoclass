@@ -9,6 +9,7 @@ import com.momoclass.base.model.PageParams;
 import com.momoclass.base.model.PageResult;
 import com.momoclass.base.model.RestResponse;
 import com.momoclass.media.mapper.MediaFilesMapper;
+import com.momoclass.media.mapper.MediaProcessMapper;
 import com.momoclass.media.model.dto.QueryMediaParamsDto;
 import com.momoclass.media.model.dto.UploadFileParamsDto;
 import com.momoclass.media.model.dto.UploadFileResultDto;
@@ -52,6 +53,9 @@ import java.util.stream.Stream;
 public class MediaFilesServiceImpl implements MediaFilesService {
     @Autowired
     MediaFilesMapper mediaFilesMapper;
+
+    @Autowired
+    MediaProcessMapper mediaProcessMapper;
 
     @Autowired
     MinioClient minioClient;
@@ -116,6 +120,7 @@ public class MediaFilesServiceImpl implements MediaFilesService {
         return mimeType;
     }
 
+    @Override
     public boolean addMediaFilesToMinIO(String localFilePath,String
             mimeType,String bucket, String objectName) {
         try {
@@ -161,9 +166,24 @@ public class MediaFilesServiceImpl implements MediaFilesService {
                 log.error("保存文件信息到数据库失败,{}",mediaFiles.toString());
                 MomoClassException.cast("保存文件信息失败");
             }
+            addWaitingTask(mediaFiles);
             log.debug("保存文件信息到数据库成功,{}",mediaFiles.toString());
         }
         return mediaFiles;
+    }
+
+    // 添加待处理任务
+    private void addWaitingTask(MediaFiles mediaFiles) {
+        String filename = mediaFiles.getFilename();
+        String extension = filename.substring(filename.lastIndexOf("."));
+        String mimeType = getMimeType(extension);
+        if (mimeType.equals("video/x-msvideo")) {
+            MediaProcess mediaProcess = new MediaProcess();
+            BeanUtils.copyProperties(mediaFiles, mediaProcess);
+            mediaProcess.setStatus("1");
+            mediaProcess.setFailCount(0);
+            mediaProcessMapper.insert(mediaProcess);
+        }
     }
 
     @Override
@@ -310,7 +330,8 @@ public class MediaFilesServiceImpl implements MediaFilesService {
         return RestResponse.success(true);
     }
 
-    private File downloadFileFromMinIO(String bucket, String objectName) {
+    @Override
+    public File downloadFileFromMinIO(String bucket, String objectName) {
         File minioFile = null;
         FileOutputStream outputStream = null;
         try {
