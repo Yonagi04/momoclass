@@ -1,7 +1,9 @@
 package com.momoclass.content.service;
 
+import com.momoclass.content.model.dto.BindTeachplanMediaDto;
 import com.momoclass.content.model.dto.SaveTeachplanDto;
 import com.momoclass.content.model.dto.TeachplanDto;
+import com.momoclass.content.model.po.TeachplanMedia;
 
 import java.util.List;
 
@@ -26,4 +28,10 @@ public interface TeachplanService {
 
     // 移动课程计划
     public void moveTeachplan(String moveType, Long id);
+
+    // 课程计划和媒体文件绑定
+    public TeachplanMedia associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto);
+
+    // 课程计划和媒体文件解绑定
+    public void unassociationMedia(Long teachplanId, Long mediaId);
 }

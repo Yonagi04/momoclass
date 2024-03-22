@@ -1,7 +1,10 @@
 package com.momoclass.content.api;
 
+import com.momoclass.content.model.dto.BindTeachplanMediaDto;
 import com.momoclass.content.model.dto.SaveTeachplanDto;
 import com.momoclass.content.model.dto.TeachplanDto;
+import com.momoclass.content.model.po.Teachplan;
+import com.momoclass.content.model.po.TeachplanMedia;
 import com.momoclass.content.service.TeachplanService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,5 +48,17 @@ public class TeachplanController {
     @PostMapping("/teachplan/{moveType}/{id}")
     public void moveTeachplan(@PathVariable String moveType, @PathVariable Long id) {
         teachplanService.moveTeachplan(moveType, id);
+    }
+
+    @ApiOperation("课程计划和媒体文件绑定")
+    @PostMapping("/teachplan/association/media")
+    public TeachplanMedia associationMedia(@RequestBody BindTeachplanMediaDto bindTeachplanMediaDto) {
+        return teachplanService.associationMedia(bindTeachplanMediaDto);
+    }
+
+    @ApiOperation("课程计划和媒体文件解绑定")
+    @DeleteMapping("/teachplan/association/media/{teachplanId}/{mediaId}")
+    public void unassociationMedia(@PathVariable Long teachplanId, @PathVariable Long mediaId) {
+        teachplanService.unassociationMedia(teachplanId, mediaId);
     }
 }

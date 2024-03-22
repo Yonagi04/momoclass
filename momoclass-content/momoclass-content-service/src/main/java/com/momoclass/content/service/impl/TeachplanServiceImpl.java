@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.momoclass.base.exception.MomoClassException;
 import com.momoclass.content.mapper.TeachplanMapper;
 import com.momoclass.content.mapper.TeachplanMediaMapper;
+import com.momoclass.content.model.dto.BindTeachplanMediaDto;
 import com.momoclass.content.model.dto.SaveTeachplanDto;
 import com.momoclass.content.model.dto.TeachplanDto;
 import com.momoclass.content.model.po.Teachplan;
@@ -201,5 +202,35 @@ public class TeachplanServiceImpl implements TeachplanService {
             teachplanMapper.updateById(search);
             teachplanMapper.updateById(teachplan);
         }
+    }
+
+    @Transactional
+    @Override
+    public TeachplanMedia associationMedia(BindTeachplanMediaDto bindTeachplanMediaDto) {
+        Long teachplanId = bindTeachplanMediaDto.getTeachplanId();
+        Teachplan teachplan = teachplanMapper.selectById(teachplanId);
+        if (teachplan == null) {
+            MomoClassException.cast("教学计划不存在");
+        }
+        Integer grade = teachplan.getGrade();
+        if (grade != 2) {
+            MomoClassException.cast("只允许向二级教学计划绑定媒资文件");
+        }
+        Long courseId = teachplan.getCourseId();
+
+        int delete = teachplanMediaMapper.delete(new LambdaQueryWrapper<TeachplanMedia>().eq(TeachplanMedia::getTeachplanId, teachplanId));
+        TeachplanMedia teachplanMedia = new TeachplanMedia();
+        BeanUtils.copyProperties(bindTeachplanMediaDto, teachplanMedia);
+        teachplanMedia.setCourseId(teachplan.getCourseId());
+        teachplanMedia.setMediaFilename(bindTeachplanMediaDto.getFileName());
+        teachplanMediaMapper.insert(teachplanMedia);
+        return teachplanMedia;
+    }
+
+    @Transactional
+    @Override
+    public void unassociationMedia(Long teachplanId, Long mediaId) {
+        teachplanMediaMapper.delete(new LambdaQueryWrapper<TeachplanMedia>()
+                .eq(TeachplanMedia::getTeachplanId, teachplanId).eq(TeachplanMedia::getMediaId, mediaId));
     }
 }
