@@ -386,4 +386,10 @@ public class MediaFilesServiceImpl implements MediaFilesService {
             log.error("清除分块文件失败, chunkFileFolderPath:{}", chunkFileFolderPath, e);
         }
     }
+
+    @Override
+    public MediaFiles getFileById(String mediaId) {
+        MediaFiles mediaFiles = mediaFilesMapper.selectById(mediaId);
+        return mediaFiles;
+    }
 }
