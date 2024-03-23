@@ -59,7 +59,7 @@ public class MediaFilesController {
         // 上传文件
         UploadFileResultDto uploadFileResultDto =
                 mediaFileService.uploadFile(companyId, uploadFileParamsDto,
-                        absolutePath);
+                        absolutePath, objectName);
 
         return uploadFileResultDto;
     }

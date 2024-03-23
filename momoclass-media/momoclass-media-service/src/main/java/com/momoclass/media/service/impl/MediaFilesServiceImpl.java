@@ -187,7 +187,7 @@ public class MediaFilesServiceImpl implements MediaFilesService {
     }
 
     @Override
-    public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto, String localFilePath) {
+    public UploadFileResultDto uploadFile(Long companyId, UploadFileParamsDto uploadFileParamsDto, String localFilePath, String objectName) {
         File file = new File(localFilePath);
         if (!file.exists()) {
             MomoClassException.cast("文件不存在");
@@ -203,7 +203,9 @@ public class MediaFilesServiceImpl implements MediaFilesService {
         //文件的默认目录
         String defaultFolderPath = getDefaultFolderPath();
         //存储到 minio 中的对象名(带目录)
-        String objectName = defaultFolderPath + fileMd5 + extension;
+        if (StringUtils.isEmpty(objectName)) {
+            objectName = defaultFolderPath + fileMd5 + extension;
+        }
         //将文件上传到 minio
         boolean b = addMediaFilesToMinIO(localFilePath, mimeType,
                 bucketFiles, objectName);
