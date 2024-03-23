@@ -24,4 +24,6 @@ public interface CoursePublishService {
      * @param courseId
      */
     public void commitAudit(Long courseId, Long companyId);
+
+    public void coursePublish(Long companyId, Long courseId);
 }

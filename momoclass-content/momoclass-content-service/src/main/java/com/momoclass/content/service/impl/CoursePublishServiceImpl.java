@@ -1,9 +1,11 @@
 package com.momoclass.content.service.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.momoclass.base.exception.CommonError;
 import com.momoclass.base.exception.MomoClassException;
 import com.momoclass.content.mapper.CourseBaseMapper;
 import com.momoclass.content.mapper.CourseMarketMapper;
+import com.momoclass.content.mapper.CoursePublishMapper;
 import com.momoclass.content.mapper.CoursePublishPreMapper;
 import com.momoclass.content.model.dto.CourseBaseInfoDto;
 import com.momoclass.content.model.dto.CoursePreviewDto;
@@ -15,11 +17,14 @@ import com.momoclass.content.model.po.CoursePublishPre;
 import com.momoclass.content.service.CourseBaseInfoService;
 import com.momoclass.content.service.CoursePublishService;
 import com.momoclass.content.service.TeachplanService;
+import com.momoclass.messagesdk.model.po.MqMessage;
+import com.momoclass.messagesdk.service.MqMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,6 +53,12 @@ public class CoursePublishServiceImpl implements CoursePublishService {
 
     @Autowired
     CoursePublishPreMapper coursePublishPreMapper;
+
+    @Autowired
+    CoursePublishMapper coursePublishMapper;
+
+    @Autowired
+    MqMessageService mqMessageService;
 
     @Override
     public CoursePreviewDto getCoursePreviewInfo(Long courseId) {
@@ -98,5 +109,54 @@ public class CoursePublishServiceImpl implements CoursePublishService {
         //更新课程基本表的审核状态
         courseBase.setAuditStatus("202003");
         courseBaseMapper.updateById(courseBase);
+    }
+
+    @Transactional
+    @Override
+    public void coursePublish(Long companyId, Long courseId) {
+        CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+        if (coursePublishPre == null) {
+            MomoClassException.cast("请先提交课程审核，审核完成了才能发布");
+        }
+
+        if (!coursePublishPre.getCompanyId().equals(companyId)) {
+            MomoClassException.cast("只能发布本机构的课程");
+        }
+
+        String auditStatus = coursePublishPre.getStatus();
+        if (!auditStatus.equals("202004")) {
+            MomoClassException.cast("只有审核完成了才能发布课程");
+        }
+        saveCoursePublish(courseId);
+        saveCoursePublishMessage(courseId);
+        coursePublishPreMapper.deleteById(courseId);
+    }
+
+    private void saveCoursePublish(Long courseId) {
+        CoursePublishPre coursePublishPre = coursePublishPreMapper.selectById(courseId);
+        if (coursePublishPre == null) {
+            MomoClassException.cast("请先提交课程审核，审核完成了才能发布");
+        }
+
+        CoursePublish coursePublish = new CoursePublish();
+        BeanUtils.copyProperties(coursePublishPre, coursePublish);
+        coursePublish.setStatus("202004");
+        CoursePublish coursePublishUpdate = coursePublishMapper.selectById(courseId);
+        if (coursePublishUpdate == null) {
+            coursePublishMapper.insert(coursePublish);
+        } else {
+            coursePublishMapper.updateById(coursePublish);
+        }
+
+        CourseBase courseBase = courseBaseMapper.selectById(courseId);
+        courseBase.setStatus("203002");
+        courseBaseMapper.updateById(courseBase);
+    }
+
+    private void saveCoursePublishMessage(Long courseId) {
+        MqMessage mqMessage = mqMessageService.addMessage("course-publish", String.valueOf(courseId), null, null);
+        if (mqMessage == null) {
+            MomoClassException.cast(CommonError.UNKNOW_ERROR);
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.momoclass.content.api;
 
 import com.momoclass.content.model.dto.CoursePreviewDto;
 import com.momoclass.content.service.CoursePublishService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,5 +37,13 @@ public class CoursePublishController {
     public void commitAudit(@PathVariable Long courseId) {
         Long companyId = 1232141425L;
         coursePublishService.commitAudit(courseId, companyId);
+    }
+
+    @ApiOperation("课程发布")
+    @ResponseBody
+    @PostMapping("/coursepublish/{courseId}")
+    public void coursePublish(@PathVariable Long courseId) {
+        Long companyId = 1232141425L;
+        coursePublishService.coursePublish(companyId, courseId);
     }
 }
