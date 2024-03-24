@@ -1,6 +1,11 @@
 package com.momoclass.content.service.jobhandler;
 
 import com.momoclass.base.exception.MomoClassException;
+import com.momoclass.content.feignclient.SearchServiceClient;
+import com.momoclass.content.mapper.CoursePublishMapper;
+import com.momoclass.content.model.dto.CourseIndex;
+import com.momoclass.content.model.dto.CoursePreviewDto;
+import com.momoclass.content.model.po.CoursePublish;
 import com.momoclass.content.service.CoursePublishService;
 import com.momoclass.messagesdk.model.po.MqMessage;
 import com.momoclass.messagesdk.service.MessageProcessAbstract;
@@ -8,6 +13,7 @@ import com.momoclass.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +31,12 @@ import java.io.File;
 public class CoursePublishTask extends MessageProcessAbstract {
     @Autowired
     CoursePublishService coursePublishService;
+
+    @Autowired
+    SearchServiceClient searchServiceClient;
+
+    @Autowired
+    CoursePublishMapper coursePublishMapper;
 
     @XxlJob("CoursePublishJobHandler")
     public void coursePublishJobHandler() throws Exception {
@@ -80,7 +92,13 @@ public class CoursePublishTask extends MessageProcessAbstract {
             return;
         }
         // 开始写入课程索引
-
+        CoursePublish coursePublish = coursePublishMapper.selectById(courseId);
+        CourseIndex courseIndex = new CourseIndex();
+        BeanUtils.copyProperties(coursePublish, courseIndex);
+        Boolean add = searchServiceClient.add(courseIndex);
+        if (!add) {
+            MomoClassException.cast("索引添加失败");
+        }
         // 任务处理完成写任务状态为完成
         mqMessageService.completedStageTwo(taskId);
     }
