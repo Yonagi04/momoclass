@@ -2,6 +2,8 @@ package com.momoclass.content.service;
 
 import com.momoclass.content.model.dto.CoursePreviewDto;
 
+import java.io.File;
+
 /**
  * @author Yonagi
  * @version 1.0
@@ -25,5 +27,24 @@ public interface CoursePublishService {
      */
     public void commitAudit(Long courseId, Long companyId);
 
+    /**
+     * 课程发布
+     * @param companyId
+     * @param courseId
+     */
     public void coursePublish(Long companyId, Long courseId);
+
+    /**
+     * 课程静态化
+     * @param courseId
+     * @return
+     */
+    public File generateCourseHtml(Long courseId);
+
+    /**
+     * 上传html静态页面
+     * @param courseId
+     * @param file
+     */
+    public void uploadCourseHtml(Long courseId,File file);
 }

@@ -1,12 +1,17 @@
 package com.momoclass.content.service.jobhandler;
 
+import com.momoclass.base.exception.MomoClassException;
+import com.momoclass.content.service.CoursePublishService;
 import com.momoclass.messagesdk.model.po.MqMessage;
 import com.momoclass.messagesdk.service.MessageProcessAbstract;
 import com.momoclass.messagesdk.service.MqMessageService;
 import com.xxl.job.core.context.XxlJobHelper;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
 
 /**
  * @author Yonagi
@@ -18,6 +23,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class CoursePublishTask extends MessageProcessAbstract {
+    @Autowired
+    CoursePublishService coursePublishService;
+
     @XxlJob("CoursePublishJobHandler")
     public void coursePublishJobHandler() throws Exception {
         int shardIndex = XxlJobHelper.getShardIndex();
@@ -52,7 +60,12 @@ public class CoursePublishTask extends MessageProcessAbstract {
             return;
         }
         // 开始课程静态化
-
+        File file = coursePublishService.generateCourseHtml(courseId);
+        if (file != null) {
+            coursePublishService.uploadCourseHtml(courseId, file);
+        } else {
+            MomoClassException.cast("生成的静态页面为空");
+        }
         // 任务处理完成写任务状态为完成
         mqMessageService.completedStageOne(taskId);
     }
