@@ -2,9 +2,11 @@ package com.momoclass.ucenter.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.momoclass.ucenter.mapper.XcMenuMapper;
 import com.momoclass.ucenter.mapper.XcUserMapper;
 import com.momoclass.ucenter.model.dto.AuthParamsDto;
 import com.momoclass.ucenter.model.dto.XcUserExt;
+import com.momoclass.ucenter.model.po.XcMenu;
 import com.momoclass.ucenter.model.po.XcUser;
 import com.momoclass.ucenter.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Yonagi
@@ -28,6 +33,9 @@ import org.springframework.stereotype.Component;
 public class UserServiceImpl implements UserDetailsService {
     @Autowired
     XcUserMapper xcUserMapper;
+
+    @Autowired
+    XcMenuMapper xcMenuMapper;
 
     @Autowired
     ApplicationContext applicationContext;
@@ -69,10 +77,20 @@ public class UserServiceImpl implements UserDetailsService {
     }
 
     public UserDetails getUserPrincipal(XcUserExt user) {
-        String[] authorities = {"p1"};
+        List<XcMenu> xcMenus = xcMenuMapper.selectPermissionByUserId(user.getId());
+        List<String> permission = new ArrayList<>();
+        if (xcMenus.size() <= 0) {
+            permission.add("p1");
+        } else {
+            xcMenus.forEach(xcMenu -> {
+                permission.add(xcMenu.getCode());
+            });
+        }
+        user.setPermissions(permission);
         String password = user.getPassword();
         user.setPassword(null);
         String userString = JSON.toJSONString(user);
+        String[] authorities = permission.toArray(new String[0]);
         UserDetails userDetails = User.withUsername(userString)
                 .password(password)
                 .authorities(authorities)
