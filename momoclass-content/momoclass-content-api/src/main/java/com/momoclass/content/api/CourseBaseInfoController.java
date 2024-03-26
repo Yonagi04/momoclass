@@ -9,10 +9,12 @@ import com.momoclass.content.model.dto.EditCourseDto;
 import com.momoclass.content.model.dto.QueryCourseParamsDto;
 import com.momoclass.content.model.po.CourseBase;
 import com.momoclass.content.service.CourseBaseInfoService;
+import com.momoclass.content.util.SecurityUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,6 +55,8 @@ public class CourseBaseInfoController {
     @ApiOperation("根据课程id查询")
     @GetMapping("/course/{courseId}")
     public CourseBaseInfoDto getCourseById(@PathVariable Long courseId) {
+        SecurityUtil.XcUser user = SecurityUtil.getUser();
+
         CourseBaseInfoDto courseBaseInfo = courseBaseInfoService.getCourseBaseInfo(courseId);
         return courseBaseInfo;
     }

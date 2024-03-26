@@ -45,8 +45,9 @@ public class AuthorizationServer extends AuthorizationServerConfigurerAdapter {
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 .withClient("XcWebApp")
-                .secret("XcWebApp")
-                .resourceIds("momoclass") // temp
+                //.secret("XcWebApp")
+                .secret(new BCryptPasswordEncoder().encode("XcWebApp"))
+                .resourceIds("xuecheng-plus") // temp
                 .authorizedGrantTypes("authorization_code", "password", "client_credentials", "implicit", "refresh_token")
                 .scopes("all")
                 .autoApprove(false)
